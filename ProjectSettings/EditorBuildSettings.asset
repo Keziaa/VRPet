@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Oculus/Avatar/Samples/SocialStarter/Assets/MainScene.unity
+    guid: 236a5f96528802e47a70d6e47ebd3c16
+  - enabled: 0
+    path: Assets/Oculus/VR/Scenes/ControllerModels.unity
+    guid: 39cfe7aa0a2d46c47994d8d0308ec663
+  - enabled: 0
+    path: Assets/Scenes/JFMSU-Multiplayer.unity
+    guid: 95333ec3360253044a17866cfb4ce57a
+  - enabled: 0
+    path: Assets/Scenes/ObjectInteraction.unity
+    guid: 3614531835d17b543b5c8e2764f89a8e
+  - enabled: 1
+    path: Assets/Scenes/RandyMadeItPretty.unity
+    guid: 3fabee2fa3a7aca449033c69e30c62c6
+  m_configObjects: {}
