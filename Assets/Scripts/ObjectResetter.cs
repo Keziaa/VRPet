@@ -34,7 +34,7 @@ public class ObjectResetter : MonoBehaviour
     void Update()
     {
         if ((transform.position - initialPosition).sqrMagnitude > boundsLimit*boundsLimit ||
-            transform.position.y < 0.2f) {
+            transform.position.y < -1.0f) {
             ResetInitial();
         }
     }
