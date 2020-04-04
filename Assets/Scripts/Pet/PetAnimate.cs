@@ -13,6 +13,7 @@ public class PetAnimate : MonoBehaviour
 	private Vector3 startPos;
 
 	private bool pettingHead;
+	private bool onFall;
 
     // Start is called before the first frame update
     private void Start()
@@ -21,6 +22,8 @@ public class PetAnimate : MonoBehaviour
 		startPos = this.transform.position;
 		grabbable = GetComponent<OVRGrabbable>();
 		animator = GetComponent<Animator>();
+
+		StartCoroutine(check_if_fall_cr());
     }
 
 	public void ResetPos()
@@ -44,6 +47,10 @@ public class PetAnimate : MonoBehaviour
 		else if(isFlying)
 		{
 			animator.SetInteger("animation", 14);
+		}
+		else if(onFall)
+		{
+			animator.SetInteger("animation", 8);
 		}
 		else
 		{
@@ -90,5 +97,25 @@ public class PetAnimate : MonoBehaviour
 	public void MoveBack()
 	{
 		this.GetComponent<ObjectResetter>().MoveBack();
+	}
+
+	private IEnumerator check_if_fall_cr()
+	{
+		YieldInstruction wait = new WaitForSeconds(4.0f);
+		while (true)
+		{
+			yield return wait;
+
+			int val = Random.Range(0, 10);
+
+			if(val == 0)
+			{
+				onFall = true;
+				yield return wait;
+				onFall = false;
+			}
+
+			yield return null;
+		}
 	}
 }
