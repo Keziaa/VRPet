@@ -4,8 +4,17 @@ using UnityEngine;
 
 public class PetAnimate : MonoBehaviour
 {
+	private const float headRaycastLength = 0.5f;
+	private const float mouthRaycastLength = 0.5f;
+
+	private const float medScale = 1.2f;
+	private const float maxScale = 1.4f;
+
 	public bool isFlying;
 	public bool inStartPos;
+
+	private enum GrowStates { Small, Medium, Large}
+	private GrowStates growState;
 
 	private OVRPlayerController player;
 	private OVRGrabbable grabbable;
@@ -14,10 +23,13 @@ public class PetAnimate : MonoBehaviour
 
 	private bool pettingHead;
 	private bool onFall;
+	private bool isEating;
+	private bool isGrowing = false;
 
     // Start is called before the first frame update
     private void Start()
     {
+		growState = GrowStates.Small;
 		inStartPos = true;
 		startPos = this.transform.position;
 		grabbable = GetComponent<OVRGrabbable>();
@@ -31,10 +43,8 @@ public class PetAnimate : MonoBehaviour
 		this.transform.position = startPos;
 	}
 
-    // Update is called once per frame
     private void Update()
 	{
-		CheckRaycast();
 		if (grabbable.isGrabbed)
 		{
 			animator.SetInteger("animation", 3);
@@ -43,6 +53,15 @@ public class PetAnimate : MonoBehaviour
 		else if (pettingHead)
 		{
 			animator.SetInteger("animation", 12);
+		}
+		else if(isEating)
+		{
+			animator.SetInteger("animation", 5);
+			if(growState != GrowStates.Large && !isGrowing)
+			{
+				StartCoroutine(grow_big_cr());
+				isGrowing = true;
+			}
 		}
 		else if(isFlying)
 		{
@@ -56,17 +75,29 @@ public class PetAnimate : MonoBehaviour
 		{
 			animator.SetInteger("animation", 1);
 		}
-	
+
+		if(Vector3.Distance(this.transform.position, startPos) > 0.5f)
+		{
+			inStartPos = false;
+		}
     }
 
-	private void CheckRaycast()
+	private void FixedUpdate()
+	{
+		CheckHeadRaycast();
+		CheckMouthRaycast();
+	}
+
+	private void CheckHeadRaycast()
 	{
 		RaycastHit hit;
-	
-		if (Physics.Raycast(transform.position, Vector3.up, out hit))
+
+		Vector3 center = this.transform.position;
+		Debug.DrawRay(center, Vector3.up * headRaycastLength, Color.yellow);
+
+		if (Physics.Raycast(center, Vector3.up, out hit, headRaycastLength))
 		{
-			Debug.DrawRay(transform.position, Vector3.up * hit.distance, Color.yellow);
-			if (hit.transform.tag == "Hand")
+			if (hit.transform.tag == "Hand" && hit.transform != this.transform)
 			{
 				Debug.Log("Did Hit");
 				pettingHead = true;
@@ -75,6 +106,35 @@ public class PetAnimate : MonoBehaviour
 			{
 				pettingHead = false;
 			}
+		}
+		else
+		{
+			pettingHead = false;
+		}
+	}
+
+	private void CheckMouthRaycast()
+	{
+		RaycastHit hit;
+
+		Vector3 center = this.transform.position + GetComponent<BoxCollider>().center;
+		Debug.DrawRay(center, transform.forward * mouthRaycastLength, Color.red);
+
+		if (Physics.Raycast(center, transform.forward, out hit, mouthRaycastLength))
+		{
+			if (hit.transform.tag == "Food" && hit.transform != this.transform)
+			{
+				Debug.Log("Eating");
+				isEating = true;
+			}
+			else
+			{
+				isEating = false;
+			}
+		}
+		else
+		{
+			isEating = false;
 		}
 	}
 
@@ -117,5 +177,36 @@ public class PetAnimate : MonoBehaviour
 
 			yield return null;
 		}
+	}
+
+	private IEnumerator grow_big_cr()
+	{
+		float growScale = 1.0f;
+
+		if(growState == GrowStates.Small)
+		{
+			growState = GrowStates.Medium;
+			growScale = medScale;
+		}
+		else if(growState == GrowStates.Medium)
+		{
+			growState = GrowStates.Large;
+			growScale = maxScale;
+		}
+
+		Vector3 newScale = new Vector3(growScale, growScale, growScale);
+
+		float t = 0.0f;
+		float time = 3.0f;
+
+		while(t < time)
+		{
+			t += Time.deltaTime;
+			this.transform.localScale = Vector3.Lerp(this.transform.localScale, newScale, t / time);
+			yield return null;
+		}
+
+		isGrowing = false;
+		yield return null;
 	}
 }

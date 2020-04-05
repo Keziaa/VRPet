@@ -12,7 +12,8 @@ public class ObjectResetter : MonoBehaviour
     Rigidbody rb;
 	PetAnimate pet;
 
-    const float boundsLimit = 3.0f;
+	const float otherBoundsLimit = 1.0f;
+    const float petBoundsLimit = 3.0f;
 	private bool movingBack = false;
 	private bool colliding = false;
 
@@ -21,7 +22,11 @@ public class ObjectResetter : MonoBehaviour
         initialPosition = transform.position;
         initialRotation = transform.rotation;
         rb = GetComponent<Rigidbody>();
-		pet = GetComponent<PetAnimate>();
+
+		if (GetComponent<PetAnimate>())
+		{
+			pet = GetComponent<PetAnimate>();
+		}
     }
 
     void ResetInitial()
@@ -37,14 +42,25 @@ public class ObjectResetter : MonoBehaviour
 
     void Update()
     {
-        if ((transform.position - initialPosition).sqrMagnitude > boundsLimit*boundsLimit ||
-            transform.position.y < -1.0f)
+		if (!pet)
 		{
-			if (!movingBack)
+			if ((transform.position - initialPosition).sqrMagnitude > otherBoundsLimit * otherBoundsLimit ||
+		  transform.position.y < -1.0f)
 			{
-				MoveBack();
+				ResetInitial();
 			}
-        }
+		}
+		else
+		{
+			if ((transform.position - initialPosition).sqrMagnitude > petBoundsLimit * petBoundsLimit ||
+				transform.position.y < -1.0f)
+			{
+				if (!movingBack)
+				{
+					MoveBack();
+				}
+			}
+		}
     }
 
     private void ResetOthers()
